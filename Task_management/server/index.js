@@ -11,11 +11,11 @@ app.set("view engine", "ejs");
 
 // Configurar pool de conexões para PostgreSQL
 const pool = new Pool({
-  host: "localhost",
-  user: "postgres", // Usuário do PostgreSQL
-  password: "", // Senha do PostgreSQL
-  database: "mernapp", // Nome do banco de dados
-  port: 5432, // Porta padrão do PostgreSQL
+    user: 'postgres',
+    host: 'localhost',
+    database: 'mernapp',
+    password: '',
+    port: 5432,
 });
 
 // Rota inicial
@@ -81,17 +81,18 @@ app.post("/createacc", async (req, res) => {
 });
 
 // Rota para deletar uma tarefa
-app.post("/deletetask", async (req, res) => {
-  let task = req.body.task.substring(2); // Remove os primeiros dois caracteres
-  const { username } = req.body;
+app.deleteTask = async (req, res) => {
+  const { id } = req.params;
   try {
-    await pool.query("DELETE FROM tasks WHERE tasks = $1 AND username = $2", [task, username]);
-    res.redirect(`http://localhost:3000/users?username=${username}`);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("Erro ao deletar tarefa.");
+      const result = await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
+      if (result.rowCount === 0) {
+          return res.status(404).send('Tarefa não encontrada');
+      }
+      res.send('Tarefa deletada com sucesso');
+  } catch (error) {
+      res.status(500).send(error);
   }
-});
+};
 
 // Iniciar o servidor
 app.listen(9000, () => {
