@@ -12,7 +12,7 @@ const Task1=()=>{
     var text="";
     for(var x in tasks){
         
-        if(tasks[x]==":"){
+        if(tasks[x]===":"){
             text+=tasks[x]+"\n";
         }
         else{
