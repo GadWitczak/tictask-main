@@ -84,14 +84,24 @@ app.post("/createacc", async (req, res) => {
 app.post("/deletetask", async (req, res) => {
   let task = req.body.task.substring(2); // Remove os primeiros dois caracteres
   const { username } = req.body;
+
+  console.log("Tentando deletar:", task, "do usuário:", username);
+
   try {
-    await pool.query("DELETE FROM tasks WHERE tasks = $1 AND username = $2", [task, username]);
-    res.redirect(`http://localhost:3000/users?username=${username}`);
+    const result = await pool.query("DELETE FROM tasks WHERE TRIM(tasks) = TRIM($1) AND username = $2", [task, username]);
+    console.log("Linhas afetadas:", result.rowCount);
+
+    if (result.rowCount > 0) {
+      res.redirect(`http://localhost:3000/users?username=${username}`);
+    } else {
+      res.status(404).send("Tarefa não encontrada.");
+    }
   } catch (err) {
     console.error(err);
     res.status(500).send("Erro ao deletar tarefa.");
   }
 });
+
 
 // Iniciar o servidor
 app.listen(9000, () => {
