@@ -11,11 +11,11 @@ app.set("view engine", "ejs");
 
 // Configurar pool de conexões para PostgreSQL
 const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'mernapp',
-    password: '',
-    port: 5432,
+  host: "localhost",
+  user: "postgres", // Usuário do PostgreSQL
+  password: "", // Senha do PostgreSQL
+  database: "mernapp", // Nome do banco de dados
+  port: 5432, // Porta padrão do PostgreSQL
 });
 
 // Rota inicial
@@ -81,18 +81,27 @@ app.post("/createacc", async (req, res) => {
 });
 
 // Rota para deletar uma tarefa
-app.deleteTask = async (req, res) => {
-  const { id } = req.params;
+app.post("/deletetask", async (req, res) => {
+  let task = req.body.task.substring(2); // Remove os primeiros dois caracteres
+  const { username } = req.body;
+
+  console.log("Tentando deletar:", task, "do usuário:", username);
+
   try {
-      const result = await pool.query('DELETE FROM tasks WHERE id = $1', [id]);
-      if (result.rowCount === 0) {
-          return res.status(404).send('Tarefa não encontrada');
-      }
-      res.send('Tarefa deletada com sucesso');
-  } catch (error) {
-      res.status(500).send(error);
+    const result = await pool.query("DELETE FROM tasks WHERE TRIM(tasks) = TRIM($1) AND username = $2", [task, username]);
+    console.log("Linhas afetadas:", result.rowCount);
+
+    if (result.rowCount > 0) {
+      res.redirect(`http://localhost:3000/users?username=${username}`);
+    } else {
+      res.status(404).send("Tarefa não encontrada.");
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Erro ao deletar tarefa.");
   }
-};
+});
+
 
 // Iniciar o servidor
 app.listen(9000, () => {
