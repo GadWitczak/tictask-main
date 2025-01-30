@@ -23,6 +23,7 @@ const Task1=()=>{
   
     return(
         <>
+        
        <p >{text}</p>
      
         </>

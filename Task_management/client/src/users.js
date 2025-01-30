@@ -27,6 +27,7 @@ else{
 }
      return(
         <>
+        
             {text1}
             </>
      )
@@ -38,7 +39,7 @@ const Getusername=()=>{
      global.username=username;
      return (
       <>
-        <input class='hidden' type='text' name='username' value={global.username} readOnly/>
+        <h1>{username }</h1>
       </>
      )
 }
@@ -59,8 +60,8 @@ class Users extends React.Component{
     render(){
      return <> 
 
-     <div class='container-fluid bg-primary text-white' >
-    <h1 class='head'>YOUR TODOLIST</h1>
+     <div class='container-fluid bg-primary text-purple' >
+  
     <div style={{display:"inline-block",marginLeft:"80%"}}>
      <a href='http://localhost:3000' class='btn btn-danger'>Logout</a> </div>
      
@@ -81,7 +82,7 @@ class Users extends React.Component{
     
         <button style={{marginLeft:"2%"}} type='submit' class='btn btn-primary'>ADD</button>
         </div>
-        <h1>{<Getusername/>}</h1>
+        <h1> Ola, {<Getusername/>}</h1>
     </form>
     </div>
       </>
