@@ -39,7 +39,7 @@ const Getusername=()=>{
      global.username=username;
      return (
       <>
-        <h1>{username }</h1>
+        <h1>Ola, {username }</h1>
       </>
      )
 }
@@ -67,6 +67,8 @@ class Users extends React.Component{
      
      <hr/>
      </div>
+     <h1> {<Getusername/>}</h1>
+
      <div class='taskdiv'>
     
       <h3 class='tasks' ><Callapi1/></h3>
@@ -82,7 +84,6 @@ class Users extends React.Component{
     
         <button style={{marginLeft:"2%"}} type='submit' class='btn btn-primary'>ADD</button>
         </div>
-        <h1> Ola, {<Getusername/>}</h1>
     </form>
     </div>
       </>
