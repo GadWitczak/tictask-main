@@ -13,8 +13,8 @@ app.set("view engine", "ejs");
 const pool = new Pool({
   host: "localhost",
   user: "postgres", // Usuário do PostgreSQL
-  password: "password", // Senha do PostgreSQL
-  database: "postgres", // Nome do banco de dados
+  password: "1234", // Senha do PostgreSQL
+  database: "mernapp", // Nome do banco de dados
   port: 5432, // Porta padrão do PostgreSQL
 });
 
@@ -54,12 +54,21 @@ app.post("/login", async (req, res) => {
 
 // Rota para criar uma nova tarefa
 app.post("/createtask", async (req, res) => {
+  console.log("Recebendo dados no backend:", req.body); // <-- Adicionado para debug
+
   const { newtask, username } = req.body;
+
+  if (!username) {
+    console.error("Erro: newtask ou username estão ausentes.");
+    return res.status(400).send("username inválido.");
+  }
+
   try {
     await pool.query("INSERT INTO tasks (username, tasks) VALUES ($1, $2)", [username, newtask]);
+    console.log(`Tarefa adicionada com sucesso: ${newtask} para o usuário ${username}`);
     res.redirect(`http://localhost:3000/users?username=${username}`);
   } catch (err) {
-    console.error(err);
+    console.error("Erro ao criar tarefa:", err);
     res.status(500).send("Erro ao criar tarefa.");
   }
 });

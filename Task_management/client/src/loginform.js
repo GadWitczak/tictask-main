@@ -13,10 +13,10 @@ class Loginform extends React.Component{
     this.state={username:"",password:""};
    }
     static getDerivedStateFromProps(props,state){
-        if(props.credentials=="invalid"){
+        if(props.credentials==="invalid"){
             alert("incorrect username/password");
         }
-        if(props.credentials=="acccreated"){
+        if(props.credentials==="acccreated"){
             alert("account created successfully");
         }
     }

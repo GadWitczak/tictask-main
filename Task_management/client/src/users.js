@@ -21,7 +21,7 @@ const Callapi1=(props)=>{
      .then(res=>setTask((res)))
      const length=task.length;
      var text1;
-if(length!=0){
+if(length!==0){
      text1=task.split('\n').map(str=><p>{str}  <div style={{display:"inline-block"}}><form action="http://localhost:9000/deletetask" method='post'><button  class='btn btn-danger'  type='submit'>Delete</button><input type='hidden' name='task' value={str}></input><input type='hidden' name='username' value={global.username}></input></form></div> </p>)
 }
 else{
@@ -48,16 +48,16 @@ const Getusername=()=>{
          <Pop_up  Setrigger={Setpop} trigger={pop}>
 
          <div style={{float:"center"}}>
-      <form action='http://localhost:9000/createtask' method="POST" class='form-group'>
-      <br/>
-      <div class='addtask_div'>
-        <h5>Add new task:</h5><input type='text' class='form-control-lg' name='newtask'/>
-    
-      
-    
-        <button style={{marginLeft:"2%"}} type='submit' class='btn btn-primary'>ADD</button>
-        </div>
-    </form>
+         <form action='http://localhost:9000/createtask' method="POST" class='form-group'>
+           <br/>
+             <div class='addtask_div'>
+               <h5>Add new task:</h5>
+               <input type='text' class='form-control-lg' name='newtask'/>
+                <input type="hidden" name="username" value={global.username} />
+                <button style={{marginLeft:"2%"}} type='submit' class='btn btn-primary'>ADD</button>
+            </div>
+        </form>
+
     </div>
          </Pop_up>
  
