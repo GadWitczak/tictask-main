@@ -45,7 +45,7 @@ const Getusername=()=>{
       <>
         <h1>Ola, {username }</h1>
         <button  onClick={()=>{Setpop(true)}}>Adicionar</button>
-         <Pop_up trigger={pop}>
+         <Pop_up  Setrigger={Setpop} trigger={pop}>
 
          <div style={{float:"center"}}>
       <form action='http://localhost:9000/createtask' method="POST" class='form-group'>

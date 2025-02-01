@@ -5,7 +5,7 @@ export default function Pop_up(props) {
  <div className='pop-up'>
     <div className='pop-inner'>
 
-<button>Close</button>
+<button onClick={()=>props.Setrigger(false)}>Close</button>
 {props.children}
     </div>
  </div>
