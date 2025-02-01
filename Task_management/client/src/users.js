@@ -8,8 +8,10 @@ import { useSearchParams } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import './style.css'
 import './bootstrap.css'
+import Pop_up from './pop_up';
 let count=1;
 const Callapi1=(props)=>{
+  
     const [task,setTask]=useState("")
     const search=useLocation().search;
      global.username=new URLSearchParams(search).get('username')
@@ -35,46 +37,17 @@ else{
 }
 const Getusername=()=>{
     const search=useLocation().search;
-     var username=new URLSearchParams(search).get('username')
+    const [pop,Setpop]=useState(false) 
+    var username=new URLSearchParams(search).get('username')
      global.username=username;
+
      return (
       <>
         <h1>Ola, {username }</h1>
-      </>
-     )
-}
+        <button  onClick={()=>{Setpop(true)}}>Adicionar</button>
+         <Pop_up trigger={pop}>
 
-class Users extends React.Component{
-    constructor(props){
-        super(props);
-        
-        <>
-        <Callapi1/>
-        <Getusername/>  
-        </>
-       
-    };
-   
-   
-    
-    render(){
-     return <> 
-
-     <div class='container-fluid bg-primary text-purple' >
-  
-    <div style={{display:"inline-block",marginLeft:"80%"}}>
-     <a href='http://localhost:3000' class='btn btn-danger'>Logout</a> </div>
-     
-     <hr/>
-     </div>
-     <h1> {<Getusername/>}</h1>
-
-     <div class='taskdiv'>
-    
-      <h3 class='tasks' ><Callapi1/></h3>
-    
-      </div>
-      <div style={{float:"center"}}>
+         <div style={{float:"center"}}>
       <form action='http://localhost:9000/createtask' method="POST" class='form-group'>
       <br/>
       <div class='addtask_div'>
@@ -86,6 +59,47 @@ class Users extends React.Component{
         </div>
     </form>
     </div>
+         </Pop_up>
+ 
+       </>
+     )
+}
+
+
+
+
+
+class Users extends React.Component{
+   
+    constructor(props){
+        super(props);
+        
+        <>
+        <Callapi1/>
+        <Getusername/>  
+        </>
+       
+    };
+    
+    
+    render(){
+     return <> 
+
+     <div class='container-fluid bg-primary text-purple' >
+  
+    <div style={{display:"inline-block",marginLeft:"80%"}}>
+     <a href='http://localhost:3000' class='btn btn-danger'>Logout</a> </div>
+     
+     <hr/>
+     </div>
+     <h1> {<Getusername/>}     </h1>
+    <Pop_up></Pop_up>
+    
+     <div class='taskdiv'>
+      <h3 class='tasks' ><Callapi1/></h3>
+    
+      </div>
+     
       </>
     
     };
