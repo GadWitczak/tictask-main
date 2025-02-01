@@ -13,26 +13,68 @@ let count=1;
 const Callapi1=(props)=>{
   
     const [task,setTask]=useState("")
+    const [createdAt, setCreatedAt] = useState();
+
     const search=useLocation().search;
      global.username=new URLSearchParams(search).get('username')
-    
+ 
      fetch("http://localhost:9000/users?username="+global.username)
      .then(res=>res.text())
-     .then(res=>setTask((res)))
-     const length=task.length;
-     var text1;
-if(length!==0){
-     text1=task.split('\n').map(str=><p>{str}  <div style={{display:"inline-block"}}><form action="http://localhost:9000/deletetask" method='post'><button  class='btn btn-danger'  type='submit'>Delete</button><input type='hidden' name='task' value={str}></input><input type='hidden' name='username' value={global.username}></input></form></div> </p>)
-}
-else{
-  text1="NO TASKS AVAILABLE"
-}
-     return(
+     .then(res=>setTask(res))
+     .then(res=>setCreatedAt(res))
+     
+
+      return task.length ? (
         <>
+
+         <div style={{
+      display: "grid",
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: "16px",
+      padding: "16px"
+    }}>
+      {task.split('\n').map((str, index) => (
+        <div key={index} style={{
+          padding: "16px",
+          boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+          borderRadius: "8px",
+          backgroundColor: "#fff"
+        }}>
+          <span style={{
+            backgroundColor: task.color,
+            color: "#fff",
+            padding: "4px 8px",
+            borderRadius: "4px",
+            fontSize: "14px",
+            fontWeight: "bold"
+          }}>{str.created_at}</span>
+          <h2 style={{ fontSize: "18px", fontWeight: "bold", marginTop: "8px" }}>{str}</h2>
+          <p style={{ color: "#555", fontSize: "14px" }}>📅 33</p>
+          <p style={{ color: "#666", fontSize: "14px", marginTop: "8px" }}>
+            Precisa entregar a documentação projeto, diagramas (caso de uso), protótipos de baixa e média, oferendas.
+          </p>
+          <div style={{ marginTop: "12px", display: "flex", gap: "8px" }}>
+            <button style={{
+              flex: 1,
+              padding: "10px",
+              backgroundColor: "#444",
+              color: "#fff",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer"
+            }}>
+              ✔ Marcar como concluída
+            </button>
+          
+             
+              <form action="http://localhost:9000/deletetask" method='post'><button  class='btn btn-danger'  type='submit'>Delete</button><input type='hidden' name='task' value={str}></input><input type='hidden' name='username' value={global.username}></input></form>
+          </div>
+        </div>
+      ))}
+    </div>
         
-            {text1}
-            </>
-     )
+          </>
+     ):''
     
 }
 const Getusername=()=>{
@@ -40,9 +82,16 @@ const Getusername=()=>{
     const [pop,Setpop]=useState(false) 
     var username=new URLSearchParams(search).get('username')
      global.username=username;
-
+     const tasks = [
+      { category: "Faculdade", title: "Eng. Software - Checkpoint 1", date: "14/01/2025", color: "purple" },
+      { category: "Casa", title: "Comprar Botijão de Gás", date: "14/01/2025", color: "orange" },
+      { category: "Trabalho", title: "Proposta Cliente 198", date: "14/01/2025", color: "green" },
+      { category: "Igreja", title: "Grupo de Oração hoje 23:59", date: "14/01/2025", color: "red" }
+    ];
      return (
       <>
+
+      
         <h1>Ola, {username }</h1>
         <button  onClick={()=>{Setpop(true)}}>Adicionar</button>
          <Pop_up  Setrigger={Setpop} trigger={pop}>
@@ -93,10 +142,9 @@ class Users extends React.Component{
      <hr/>
      </div>
      <h1> {<Getusername/>}     </h1>
-    <Pop_up></Pop_up>
     
-     <div class='taskdiv'>
-      <h3 class='tasks' ><Callapi1/></h3>
+     <div class='taskdiv' style={{backgroundColor:"black"}}>
+      <h3 class='tasks' >  <Callapi1/></h3>
     
       </div>
      

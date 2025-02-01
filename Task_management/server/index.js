@@ -13,8 +13,8 @@ app.set("view engine", "ejs");
 const pool = new Pool({
   host: "localhost",
   user: "postgres", // Usuário do PostgreSQL
-  password: "1234", // Senha do PostgreSQL
-  database: "mernapp", // Nome do banco de dados
+  password: "password", // Senha do PostgreSQL
+  database: "postgres", // Nome do banco de dados
   port: 5432, // Porta padrão do PostgreSQL
 });
 
