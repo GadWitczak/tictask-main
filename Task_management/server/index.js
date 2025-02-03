@@ -27,14 +27,15 @@ app.get("/", (req, res) => {
 app.get("/users", async (req, res) => {
   const username = req.query.username;
   try {
-    const result = await pool.query("SELECT tasks FROM tasks WHERE username = $1", [username]);
-    let text = result.rows.map((row, index) => `${index + 1}. ${row.tasks}`).join("\n");
-    res.send(text);
+    const result = await pool.query("SELECT * FROM tasks WHERE username = $1", [username]);
+   
+    res.send(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).send("Erro ao buscar tarefas.");
   }
 });
+
 
 // Rota para login
 app.post("/login", async (req, res) => {
@@ -51,21 +52,53 @@ app.post("/login", async (req, res) => {
     res.status(500).send("Erro ao realizar login.");
   }
 });
+app.put("/tasks/:id", async (req, res) => {
+  const { id } = req.params;
+  const { novofeito }  = req.body; // Pegando 'feito' do corpo da requisição
+  console.log(req.body)
+  console.log("ID:", id, "Feito Atual:", novofeito);
 
+  console.log(`🔄 Recebida atualização: id=${id}, feito=${novofeito}`);
+
+  // Verifica se 'feito' foi enviado corretamente
+  if (feito === undefined) {
+    console.error("❌ Erro: O campo 'feito' está indefinido.");
+    return res.status(400).json({ error: "O campo 'feito' é obrigatório e deve ser true ou false." });
+  }
+
+  try {
+    const result = await pool.query(
+      "UPDATE tasks SET feito = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
+      [feito, id]
+    );
+
+    if (result.rowCount > 0) {
+      console.log("✅ Tarefa atualizada com sucesso:", result.rows[0]);
+      res.status(200).json({ message: "✅ Tarefa atualizada com sucesso!", task: result.rows[0] });
+    } else {
+      console.error("❌ Erro: Tarefa não encontrada.");
+      res.status(404).json({ error: "❌ Tarefa não encontrada." });
+    }
+  } catch (err) {
+    console.error("❌ Erro ao atualizar a tarefa:", err);
+    res.status(500).send("Erro ao atualizar a tarefa.");
+  }
+});
 // Rota para criar uma nova tarefa
 app.post("/createtask", async (req, res) => {
   console.log("Recebendo dados no backend:", req.body); // <-- Adicionado para debug
 
-  const { newtask, username } = req.body;
-
+  const { newtask, username,newdescricao,newcheck} = req.body;
+    console.log(req.body)
   if (!username) {
     console.error("Erro: newtask ou username estão ausentes.");
     return res.status(400).send("username inválido.");
   }
 
   try {
-    await pool.query("INSERT INTO tasks (username, tasks) VALUES ($1, $2)", [username, newtask]);
-    console.log(`Tarefa adicionada com sucesso: ${newtask} para o usuário ${username}`);
+    await pool.query("INSERT INTO tasks (username, tasks,descricao,feito) VALUES ($1,$2,$3,$4)", [username, newtask,newdescricao,newcheck
+    ]);
+    console.log(`Tarefa adicionada com sucesso: ${newtask} para o usuário ${username} $`);
     res.redirect(`http://localhost:3000/users?username=${username}`);
   } catch (err) {
     console.error("Erro ao criar tarefa:", err);
