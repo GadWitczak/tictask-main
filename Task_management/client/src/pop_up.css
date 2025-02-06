@@ -1,22 +1,59 @@
 .pop-up {
     position: fixed;
-    top: 50%;
-    left: 50%;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(80, 80, 80, 0.8); /* Add transparency for better focus */
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
-    transform: translate(-50%, -50%);
-}
-
-.pop-inner {
+    z-index: 1000;
+  }
+  
+  .pop-inner {
     position: relative;
-    padding: 32px;
-    width: 100%;
-    max-width: 640px;
-    background-color: rgb(255, 255, 255);
-    border-radius: 8px; /* Optional: Adds rounded corners */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); /* Optional: Adds a shadow */
-}
+    background: white;
+    padding: 30px; /* Espaçamento interno da caixa */
+    border-radius: 10px;
+    width: 400px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column; /* Organiza elementos em coluna */
+    gap: 20px; /* Espaço entre os elementos */
+  }
+  
+  .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #e53e3e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .close-btn:hover {
+    background-color: #c53030;
+  }
+  
+  .pop-inner > * {
+    margin: 0; /* Remove margens padrão de elementos filhos */
+  }
+  
+  .pop-inner h5 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px; /* Espaço abaixo de cada título */
+  }
+  
+  .pop-inner input {
+    width: 100%; /* Ocupar toda a largura da caixa */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  

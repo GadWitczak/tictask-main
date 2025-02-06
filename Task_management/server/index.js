@@ -6,6 +6,7 @@ const { Pool } = pkg;
 
 const app = express();
 app.use(cors());
+app.use(express.json())
 app.use(express.urlencoded({ extended: false }));
 app.set("view engine", "ejs");
 
@@ -27,14 +28,15 @@ app.get("/", (req, res) => {
 app.get("/users", async (req, res) => {
   const username = req.query.username;
   try {
-    const result = await pool.query("SELECT tasks FROM tasks WHERE username = $1", [username]);
-    let text = result.rows.map((row, index) => `${index + 1}. ${row.tasks}`).join("\n");
-    res.send(text);
+    const result = await pool.query("SELECT * FROM tasks WHERE username = $1", [username]);
+   
+    res.send(result.rows);
   } catch (err) {
     console.error(err);
     res.status(500).send("Erro ao buscar tarefas.");
   }
 });
+
 
 // Rota para login
 app.post("/login", async (req, res) => {
@@ -54,22 +56,62 @@ app.post("/login", async (req, res) => {
 
 // Rota para criar uma nova tarefa
 app.post("/createtask", async (req, res) => {
+  console.log("Recebendo dados no backend:", req.body); // Debug
+
+  const { newtask, username, newdescricao, newcheck, newtime_date, newtime_hour } = req.body;
+
+  if (!username || !newtask || !newtime_date || !newtime_hour) {
+    console.error("Erro: campos obrigatórios ausentes.");
+    return res.status(400).send("Campos obrigatórios ausentes.");
+  }
+
+  // Concatenando data e hora corretamente
+  const fullTimestamp = `${newtime_date} ${newtime_hour}:00`;
+
+  try {
+    await pool.query(
+      "INSERT INTO tasks (username, tasks, descricao, feito, tempo) VALUES ($1, $2, $3, $4, $5)",
+      [username, newtask, newdescricao, newcheck, fullTimestamp]
+    );
+
+    console.log(`Tarefa adicionada com sucesso: ${newtask} para o usuário ${username}`);
+    res.redirect(`http://localhost:3000/users?username=${username}`);
+  } catch (err) {
+    console.error("Erro ao criar tarefa:", err);
+    res.status(500).send("Erro ao criar tarefa.");
+  }
+});
+
+app.post("/createcategorie", async (req, res) => {
   console.log("Recebendo dados no backend:", req.body); // <-- Adicionado para debug
 
-  const { newtask, username } = req.body;
-
+  const { newcategorie, username} = req.body;
+    console.log(req.body)
   if (!username) {
     console.error("Erro: newtask ou username estão ausentes.");
     return res.status(400).send("username inválido.");
   }
 
   try {
-    await pool.query("INSERT INTO tasks (username, tasks) VALUES ($1, $2)", [username, newtask]);
-    console.log(`Tarefa adicionada com sucesso: ${newtask} para o usuário ${username}`);
+    await pool.query("INSERT INTO categories (username, name) VALUES ($1,$2)", [username, newcategorie]);
     res.redirect(`http://localhost:3000/users?username=${username}`);
   } catch (err) {
     console.error("Erro ao criar tarefa:", err);
     res.status(500).send("Erro ao criar tarefa.");
+  }
+});
+
+app.put("/feito/:id", async (req, res) => {
+  const { id } = req.params;
+  const { feito } = req.body; // Recebe true ou false
+
+  try {
+      await pool.query("UPDATE tasks SET feito = $1 WHERE id = $2", [feito, id]);
+      console.log(`Tarefa ${id} atualizada para ${feito}`);
+      res.json({ mensagem: "Status atualizado!", id, feito });
+  } catch (err) {
+      console.error("Erro ao atualizar tarefa:", err);
+      res.status(500).send("Erro ao atualizar tarefa.");
   }
 });
 
@@ -90,27 +132,29 @@ app.post("/createacc", async (req, res) => {
 });
 
 // Rota para deletar uma tarefa
-app.post("/deletetask", async (req, res) => {
-  let task = req.body.task.substring(2); // Remove os primeiros dois caracteres
-  const { username } = req.body;
-
-  console.log("Tentando deletar:", task, "do usuário:", username);
+app.delete("/deletetask", async (req, res) => {
+  const { task, username } = req.body;
+  console.log(req.body)
+  if (!task || !username) {
+      return res.status(400).json({ mensagem: "ID da tarefa e usuário são obrigatórios!" });
+  }
 
   try {
-    const result = await pool.query("DELETE FROM tasks WHERE TRIM(tasks) = TRIM($1) AND username = $2", [task, username]);
-    console.log("Linhas afetadas:", result.rowCount);
+      const result = await pool.query(
+          "DELETE FROM tasks WHERE id = $1 AND username = $2",
+          [task, username]
+      );
 
-    if (result.rowCount > 0) {
-      res.redirect(`http://localhost:3000/users?username=${username}`);
-    } else {
-      res.status(404).send("Tarefa não encontrada.");
-    }
+      if (result.rowCount > 0) {
+          res.json({ mensagem: "Tarefa deletada com sucesso!" });
+      } else {
+          res.status(404).json({ mensagem: "Tarefa não encontrada." });
+      }
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Erro ao deletar tarefa.");
+      console.error("Erro ao deletar tarefa:", err);
+      res.status(500).send("Erro ao deletar tarefa.");
   }
 });
-
 
 // Iniciar o servidor
 app.listen(9000, () => {
