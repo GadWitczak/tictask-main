@@ -92,7 +92,7 @@ const Callapi1 = () => {
               <button
                 onClick={() => toggleFeito(task.id, task.feito)}
                 style={{
-                  backgroundColor: task.feito ? '#48bb78' : '#e53e3e',
+                  backgroundColor: task.feito ? '#17b329' : '#ed2143',
                   color: 'white',
                   border: 'none',
                   padding: '10px',
