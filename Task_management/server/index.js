@@ -54,23 +54,27 @@ app.post("/login", async (req, res) => {
   }
 });
 
-
-
 // Rota para criar uma nova tarefa
 app.post("/createtask", async (req, res) => {
-  console.log("Recebendo dados no backend:", req.body); // <-- Adicionado para debug
+  console.log("Recebendo dados no backend:", req.body); // Debug
 
-  const { newtask, username,newdescricao,newcheck,newtime} = req.body;
-    console.log(req.body)
-  if (!username) {
-    console.error("Erro: newtask ou username estão ausentes.");
-    return res.status(400).send("username inválido.");
+  const { newtask, username, newdescricao, newcheck, newtime_date, newtime_hour } = req.body;
+
+  if (!username || !newtask || !newtime_date || !newtime_hour) {
+    console.error("Erro: campos obrigatórios ausentes.");
+    return res.status(400).send("Campos obrigatórios ausentes.");
   }
 
+  // Concatenando data e hora corretamente
+  const fullTimestamp = `${newtime_date} ${newtime_hour}:00`;
+
   try {
-    await pool.query("INSERT INTO tasks (username, tasks,descricao,feito,tempo) VALUES ($1,$2,$3,$4,$5)", [username, newtask,newdescricao,newcheck,newtime
-    ]);
-    console.log(`Tarefa adicionada com sucesso: ${newtask} para o usuário ${username} $`);
+    await pool.query(
+      "INSERT INTO tasks (username, tasks, descricao, feito, tempo) VALUES ($1, $2, $3, $4, $5)",
+      [username, newtask, newdescricao, newcheck, fullTimestamp]
+    );
+
+    console.log(`Tarefa adicionada com sucesso: ${newtask} para o usuário ${username}`);
     res.redirect(`http://localhost:3000/users?username=${username}`);
   } catch (err) {
     console.error("Erro ao criar tarefa:", err);

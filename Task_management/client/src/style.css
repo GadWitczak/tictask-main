@@ -1,51 +1,48 @@
 body {
-    background-color: #1a202c;
-    color: #f7fafc;
-    font-family: Arial, sans-serif;
-  }
-  
-  .container {
-    padding: 20px;
-    max-width: 600px;
-    margin: auto;
-  }
-  
-  .task {
-    background: #2d3748;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .task strong {
-    font-weight: bold;
-  }
-  
-  .task-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-  }
-  
-  button {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  button.delete {
-    background: #e53e3e;
-    color: white;
-  }
-  
-  button.complete {
-    background: #48bb78;
-    color: white;
-  }
-  
-  button.mark {
-    background: #ed8936;
-    color: white;
-  }
+  background-color: #1a202c;
+  color: #f7fafc;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  display: inline-flex;
+  gap: 15px; /* Espaçamento entre os elementos */
+  padding: 20px;
+  max-width: 90%; /* Ajusta a largura do container */
+  margin: auto;
+}
+
+.task {
+  background: #2d3748;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center; /* Centraliza o texto */
+}
+
+.task strong {
+  font-weight: bold;
+}
+
+.task-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button.delete {
+  background: #e53e3e;
+  color: white;
+}
+
+button.mark {
+  background: #ed8936;
+  color: white;
+}

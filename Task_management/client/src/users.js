@@ -6,11 +6,9 @@ import './bootstrap.css';
 
 const Callapi1 = () => {
   const [tasks, setTask] = useState([]);
-  const [timestamp, setTimestamp] = useState(Date.now());
-  const date = new Date(timestamp);
   const search = useLocation().search;
   const username = new URLSearchParams(search).get('username');
-  
+
   useEffect(() => {
     fetch(`http://localhost:9000/users?username=${username}`)
       .then((res) => res.json())
@@ -59,58 +57,103 @@ const Callapi1 = () => {
 
   return (
     <div>
-      <ul>
-        {tasks.map((task) => (
-          <li key={task.id}>
-            <strong>Usuário:</strong> {task.username} <br />
-            <strong>Tarefa:</strong> {task.tasks} <br />
-            <strong>Criado em:</strong> {task.descricao} <br />
-            {date > new Date(task.tempo) ? "acabou o tempo" : "no prazo"} <br />
-            {new Date(task.tempo).toLocaleDateString('pt-BR')}
-            <br />
-            <button onClick={() => toggleFeito(task.id, task.feito)}>
-              {task.feito ? "Desmarcar" : "Marcar"}
-            </button>
-            <button className="btn btn-danger" onClick={() => deletarTarefa(task.id)}>Delete</button>
-          </li>
-        ))}
+      <ul
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '15px',
+          padding: 0,
+          listStyle: 'none',
+          justifyContent: 'center',
+        }}
+      >
+        {tasks.map((task) => {
+          const taskDate = new Date(task.tempo);
+          return (
+            <li
+              key={task.id}
+              style={{
+                backgroundColor: '#2d3748',
+                color: 'white',
+                padding: '15px',
+                borderRadius: '10px',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                width: '250px',
+                textAlign: 'center',
+                flexShrink: 0,
+              }}
+            >
+              <strong>Usuário:</strong> {task.username} <br />
+              <strong>Tarefa:</strong> {task.tasks} <br />
+              <strong>Descrição:</strong> {task.descricao} <br />
+              {new Date() > taskDate ? "Acabou o tempo" : "No prazo"} <br />
+              <strong>Data:</strong> {taskDate.toLocaleDateString('pt-BR')} <br />
+              <strong>Hora:</strong> {taskDate.toLocaleTimeString('pt-BR')} <br />
+              <button
+                onClick={() => toggleFeito(task.id, task.feito)}
+                style={{
+                  backgroundColor: task.feito ? '#48bb78' : '#e53e3e',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px',
+                  borderRadius: '5px',
+                  marginTop: '10px',
+                  cursor: 'pointer',
+                }}
+              >
+                {task.feito ? "Desmarcar" : "Concluída"}
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={() => deletarTarefa(task.id)}
+                style={{
+                  marginTop: '10px',
+                }}
+              >
+                Excluir
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </div>
-  );
-};
+  );  
+}; 
+  
 
 const Getusername = () => {
   const search = useLocation().search;
   const [pop, setPop] = useState(false);
   const username = new URLSearchParams(search).get('username');
-  
+
   return (
     <>
-      <h1>Olá, {username}</h1>
-      <form action="http://localhost:9000/createcategorie" method="POST" className="form-group">
-        <input type="text" className="form-control-lg" name="newcategorie" />
-        <input type="hidden" name="username" value={username} />
-        <button style={{ marginLeft: "2%" }} type="submit" className="btn btn-primary">
-          ADD
-        </button>
-      </form>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px" }}>
+        <h1>Olá, <strong>{username}</strong></h1>
+        <button onClick={() => setPop(true)} className="btn btn-primary">Adicionar Task</button>
+      </div>
 
-      <button onClick={() => setPop(true)}>Adicionar</button>
       <Pop_up Setrigger={setPop} trigger={pop}>
-        <div style={{ float: "center" }}>
+        <div className="addtask-container">
+          <h5>Adicionar nova Task:</h5>
           <form action="http://localhost:9000/createtask" method="POST" className="form-group">
-            <div className="addtask_div">
-              <h5>Add new task:</h5>
-              <input type="text" className="form-control-lg" name="newtask" />
-              <h5>Descrição</h5>
-              <input type="text" name="newdescricao" />
-              <input type="date" name="newtime" />
-              <input type="hidden" name="newcheck" value={false} />
-              <input type="hidden" name="username" value={username} />
-              <button style={{ marginLeft: "2%" }} type="submit" className="btn btn-primary">
-                ADD
-              </button>
-            </div>
+            <input type="text" className="form-control-lg" name="newtask" placeholder="Nome da tarefa" required />
+            
+            <h5>Descrição</h5>
+            <input type="text" name="newdescricao" placeholder="Descrição da tarefa" required />
+
+            <h5>Data de vencimento</h5>
+            <input type="date" name="newtime_date" required />
+            
+            <h5>Horário de vencimento</h5>
+            <input type="time" name="newtime_hour" required />
+
+            <input type="hidden" name="newcheck" value={false} />
+            <input type="hidden" name="username" value={username} />
+
+            <button type="submit" className="btn btn-success" style={{ marginTop: "10px" }}>
+              Criar Task
+            </button>
           </form>
         </div>
       </Pop_up>
@@ -123,13 +166,13 @@ const Users = () => {
     <>
       <div className="container-fluid bg-primary text-purple">
         <div style={{ display: "inline-block", marginLeft: "80%" }}>
-          <a href="http://localhost:3000" className="btn btn-danger">Logout</a>
+          <a href="http://localhost:3000" className="btn btn-danger">Sair</a>
         </div>
         <hr />
       </div>
-      <h1><Getusername /></h1>
+      <Getusername />
       <div className="taskdiv">
-        <h3 className="tasks"><Callapi1 /></h3>
+        <Callapi1 />
       </div>
     </>
   );
