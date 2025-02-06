@@ -92,7 +92,7 @@ const Callapi1 = () => {
               <button
                 onClick={() => toggleFeito(task.id, task.feito)}
                 style={{
-                  backgroundColor: task.feito ? '#17b329' : '#ed2143',
+                  backgroundColor: task.feito ? '#801010' : '#108010',
                   color: 'white',
                   border: 'none',
                   padding: '10px',
@@ -129,9 +129,10 @@ const Getusername = () => {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px" }}>
-        <h1>Olá, <strong>{username}</strong></h1>
+        <h1><span style={{ color: "black" }}>Olá, <strong>{username}</strong></span></h1>
         <button onClick={() => setPop(true)} className="btn btn-primary">Adicionar Task</button>
       </div>
+
 
       <Pop_up Setrigger={setPop} trigger={pop}>
         <div className="addtask-container">
