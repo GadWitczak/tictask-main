@@ -9,7 +9,7 @@ export default function Pop_up(props) {
           onClick={() => props.Setrigger(false)} 
           className="close-btn"
         >
-          Fechar
+          x
         </button>
         {props.children}
       </div>
