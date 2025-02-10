@@ -129,12 +129,13 @@ const Getusername = () => {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px" }}>
-        <h1>Olá, <strong>{username}</strong></h1>
+        <h1 style={{color:"black"}}>Olá, <strong>{username}</strong></h1>
         <button onClick={() => setPop(true)} className="btn btn-primary">Adicionar Task</button>
       </div>
 
       <Pop_up Setrigger={setPop} trigger={pop}>
         <div className="addtask-container">
+          
           <h5>Adicionar nova Task:</h5>
           <form action="http://localhost:9000/createtask" method="POST" className="form-group">
             <input type="text" className="form-control-lg" name="newtask" placeholder="Nome da tarefa" required />
@@ -151,7 +152,7 @@ const Getusername = () => {
             <input type="hidden" name="newcheck" value={false} />
             <input type="hidden" name="username" value={username} />
 
-            <button type="submit" className="btn btn-success" style={{ marginTop: "10px" }}>
+            <button type="submit" className="btn btn-success" style={{ marginTop: "30px" }}>
               Criar Task
             </button>
           </form>
