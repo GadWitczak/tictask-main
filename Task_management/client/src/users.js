@@ -69,48 +69,79 @@ const Callapi1 = () => {
     }
   };
 
-  const filtradas = tasks.filter((task) => {
-    const taskDate = new Date(task.tempo);
-    if (activeTab === "No Prazo") return new Date() <= taskDate && !task.feito && !task.lixo;
-    if (activeTab === "Atrasadas") return new Date() > taskDate && !task.feito && !task.lixo;
-    if (activeTab === "Feitas") return task.feito && !task.lixo;
-    if (activeTab === "Lixeira") return task.lixo;
-    return false;
-  });
+
 
   return (
-    <div className="task-container">
-      <div className="tabs" style={{ display: "flex", justifyContent: "center", gap: "10px", marginBottom: "20px" }}>
-        {['No Prazo', 'Atrasadas', 'Feitas', 'Lixeira'].map((tab) => (
-          <button key={tab} className={activeTab === tab ? "active" : ""} onClick={() => setActiveTab(tab)}>
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
-        ))}
+   <div>
+
+<div  style={{display:'grid', gridTemplateColumns:'repeat(2,0.40fr)',gap:'1px',justifyContent:'center',marginTop:50}}className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+    
+    {tasks.map((task) => {
+      const taskDate = new Date(task.tempo);
+      return (
+        
+        <div key={task.id} style={{backgroundColor:'#CFE2FF',alignContent:'center',height:280,borderRadius:16}} className="task-card">
+          <div> <h1 style={{marginLeft:50,marginTop:20,color:'black'}}>{task.tasks}</h1></div>
+          <div> <p style={{width:600,marginLeft:50,marginTop:20,color:"#68717A"}}>  {task.descricao} </p></div>
+          
+         
+          <div style={{marginTop:50,marginLeft:50,color:"black"}}>
+
+          {new Date() > taskDate ? "Acabou o tempo" : "No prazo"}: 
+            {taskDate.toLocaleDateString('pt-BR')}-{taskDate.toLocaleTimeString('pt-BR')} <br />
+
+          </div>
+          <div>
+       <div style={{display:'flex',justifyContent:'space-around'}}>
+       
+     <h6  style={{backgroundColor:"#9747FF",width:150,borderRadius:12,paddingLeft:25,height:30,paddingTop:5,marginTop:20}}>        {task.nome_categoria || "Sem categoria"}
+     </h6>
+        
+
+       <div style={{display:'flex',justifyContent:'space-around'}}>
+
+<div > <button
+  onClick={() => toggleFeito(task.id, task.feito)}
+  style={{
+    backgroundColor: task.feito ? "gray" : "green",
+    color: task.feito ? "white" : "white",
+    borderRadius: "5px",
+  }}
+>
+  {task.feito ? "Desmarcar" : "Concluída"}
+</button>
+</div>
+<div style={{marginLeft:10}}> <button style={{backgroundColor:"yellow",color:"black"
+}}>Editar</button></div>
+<div style={{marginLeft:10}}>  <button style={{backgroundColor:"red",color:"white"}} onClick={() => excluirPermanentemente(task.id)}>Excluir</button></div>
+
+
+   
+
+    
+
+</div>
+       </div>
+       
+          
+          </div>
+         
+          
       </div>
-        <ul className="task-list">
-            {filtradas.map((task) => {
-              const taskDate = new Date(task.tempo);
-              return (
-                <li key={task.id} className="task-card">
-                  <strong>Categoria:</strong> {task.categoria || "Sem categoria"} <br />
-                  <strong>Tarefa:</strong> {task.tasks} <br />
-                  <strong>Descrição:</strong> {task.descricao} <br />
-                  {new Date() > taskDate ? "Acabou o tempo" : "No prazo"} <br />
-                  <strong>Data:</strong> {taskDate.toLocaleDateString('pt-BR')} <br />
-                  <strong>Hora:</strong> {taskDate.toLocaleTimeString('pt-BR')} <br />
-                  <button onClick={() => toggleFeito(task.id, task.feito)}>
-                    {task.feito ? "Desmarcar" : "Concluída"}
-                  </button>
-                  {!task.lixo ? (
-                    <button onClick={() => moverParaLixeira(task.id)}>Lixeira</button>
-                  ) : (
-                    <button onClick={() => excluirPermanentemente(task.id)}>Excluir</button>
-                  )}
-              </li>
-            );
-          })}
-        </ul>
-    </div>
+
+
+    );
+  })}
+
+  
+  </div>
+    
+ 
+
+   </div>
+      
+    
   );
 };
 
@@ -162,41 +193,60 @@ const Getusername = () => {
 
       if (!response.ok) throw new Error(await response.text());
 
-      alert("Categoria criada com sucesso!");
-      
+            alert("Categoria criada com sucesso!");
+
       // 🔹 Atualiza categorias sem precisar recarregar a página
-      setCategorias([...categorias, { id: categorias.length + 1, nome: data.newcategory }]);
+      setCategorias([...categorias, { id: categorias.length , nome: data.newcategory }]);
     } catch (error) {
       console.error("Erro ao criar categoria:", error);
       alert("Erro ao criar categoria!");
     }
   };
 
-  useEffect(() => {
-    fetch(`http://localhost:9000/getcategories?username=${username}`)
-      .then((res) => res.json())
-      .then((data) => setCategorias(data))
-      .catch((error) => console.error("Erro ao buscar categorias:", error));
-  }, [username]);
+ 
 
   return (
     <>
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "20px" }}>
-        <h1 style={{color:"black"}}>Olá, <strong>{username}</strong></h1>
-        <button onClick={() => setPop(true)} className="btn btn-primary">Adicionar Task</button>
-        <button onClick={() => setPopCategoria(true)} className="btn btn-secondary">Criar Categoria</button>
-        <button onClick={() => setPopDeleteCategoria(true)} className="btn btn-danger">Gerenciar Categorias</button>
+    
+   
+      <div style={{ display: "flex", justifyContent: "space-around", alignItems: "center", gap: "20px" }}>
+
+        <div style={{backgroundColor:"",marginTop:-100}}>
+        <h1 style={{color:"black",fontSize:40}}>Olá, <strong>{username}</strong></h1>
+
+
+        </div>
+       <div style={{backgroundColor:"",justifyContent:"space-between",display:"flex",gap:50}}> 
+
+        <div>
+        <button onClick={() => setPop(true)} style={{width:196,height:60,color:'white',borderRadius:6,backgroundColor:"#5227CC"}} > <strong>+ Criar Nova tarefa</strong></button>
+
+
+        </div>
+        <div>
+
+        <button onClick={() => setPopCategoria(true)}  style={{width:196,height:60,color:'#5227CC'}} ><strong>+ Criar Nova Categoria</strong></button>
+
+        </div>
+        <div>
+        <button onClick={() => setPopDeleteCategoria(true)} style={{width:196,height:60,color:'#5227CC',border:"2px solid #5227CC",backgroundColor:'white'}}> Gerenciar Categorias</button>
+
+        </div>
+
+       </div>
+
+      
       </div>
 
       {/* Pop-up para adicionar task */}
       <Pop_up Setrigger={setPop} trigger={pop}>
-        <div className="addtask-container">
-          <h5>Adicionar nova Task:</h5> <br/>
+       <div className="addtask-container">
+          <h5 style={{color:'black'}}>Adicionar nova Task:</h5> <br/>
           <form action="http://localhost:9000/createtask" method="POST" className="form-group">
             <input type="text" name="newtask" placeholder="Nome da tarefa" required />
-            <input type="text" name="newdescricao" placeholder="Descrição da tarefa" required /> <br/>
+            <textarea name="newdescricao" placeholder="Descrição da tarefa" required></textarea>
             <input type="date" name="newtime_date" required /> <br/>
-            <input type="time" name="newtime_hour" required /> <br/>
+            <input type="time" name="newtime_hour" required /> <br/> 
             <h5>Categoria</h5>
             <select name="category" required>
               <option value="">Selecione uma categoria</option>
@@ -211,11 +261,11 @@ const Getusername = () => {
           </form>
         </div>
       </Pop_up>
-
+    
       {/* Pop-up para criar categoria */}
       <Pop_up Setrigger={setPopCategoria} trigger={popCategoria}>
         <div className="addcategory-container">
-          <h5>Adicionar nova Categoria:</h5>
+          <h5 style={{color:"black"}}>Adicionar nova Categoria:</h5>
           <form onSubmit={(e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
@@ -246,70 +296,56 @@ const Getusername = () => {
 <Pop_up Setrigger={setPopDeleteCategoria} trigger={popDeleteCategoria}>
   <div className="deletecategory-container" style={{ backgroundColor: "white", padding: "20px", borderRadius: "10px", color: "black" }}>
     <h5>Excluir Categorias</h5>
-    {categorias.length > 0 ? (
-      <ul style={{ listStyle: "none", padding: "0" }}>
-        {categorias.map((categoria) => (
-          <li key={categoria.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px", borderBottom: "1px solid #ccc" }}>
-            {categoria.nome}
-            <button 
-              onClick={() => deletarCategoria(categoria.id)} 
-              style={{
-                backgroundColor: "#ff4d4d", 
-                color: "white", 
-                border: "none", 
-                padding: "5px 10px", 
-                borderRadius: "5px", 
-                cursor: "pointer",
-                fontWeight: "bold"
-              }}
-              onMouseOver={(e) => e.target.style.backgroundColor = "#cc0000"}
-              onMouseOut={(e) => e.target.style.backgroundColor = "#ff4d4d"}
-            >
-              Excluir
-            </button>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p>Nenhuma categoria encontrada.</p>
-    )}
+    { categorias.map((cat)=>(<div style={{color:"black",borderRadius:"black",justifyContent:"center"}}>
+      <div style={{marginTop:"20"}}>
+       {cat.nome}
+       <button style={{marginLeft:40,backgroundColor:"red",color:"white"}} onClick={()=>{deletarCategoria(cat.id)}}>Excluir</button>
+      </div>
+     
+    </div>))}
   </div>
 </Pop_up>
 
       <Pop_up Setrigger={setPop} trigger={pop}>
         <div className="addtask-container">
-          <h5>Adicionar nova Task:</h5> <br/>
+          <h5 style={{color:'black'}}>Adicionar nova Task:</h5> <br/>
           <form action="http://localhost:9000/createtask" method="POST" className="form-group">
-            <input type="text" name="newtask" placeholder="Nome da tarefa" required />
+            <input  type="text" name="newtask" placeholder="Nome da tarefa" required />
+          
 
-            <input type="text" name="newdescricao" placeholder="Descrição da tarefa" required /> <br/>
-            
-            <input type="date" name="newtime_date" required /> <br/>
+          <div style={{display:'flex',gap:10,marginTop:15}}>
+
+          <input type="date" name="newtime_date" required /> <br/>
             
             <input type="time" name="newtime_hour" required /> <br/>
 
-            <h5>Categoria</h5>
-            <select name="category" required>
+
+          </div>
+            
+          
+            <textarea style={{marginTop:10,width:340,height:100,marginTop:15}} name="newdescricao" placeholder="Descrição da tarefa" required></textarea>
+
+            <select  style={{marginTop:15}} name="category" >
               <option value="">Selecione uma categoria</option>
               {categorias.map((categoria) => (
-                <option key={categoria.id} value={categoria.nome}>{categoria.nome}</option>
+                <option key={categoria.id} value={categoria.id}>{categoria.nome}</option>
               ))}
             </select>
             <br/>
             <input type="hidden" name="newcheck" value={false} />
             <input type="hidden" name="username" value={username} />
-            <button type="submit">Criar Task</button>
+            <button style={{marginTop:15,alignContent:'center',backgroundColor:"#2C4DAB",color:"white",padding:10}} type="submit">Criar Task</button>
           </form>
         </div>
       </Pop_up>
 
       <Pop_up Setrigger={setPopCategoria} trigger={popCategoria}>
         <div className="addcategory-container">
-          <h5>Adicionar nova Categoria:</h5>
+          <h5 style={{color:"black"}}>Adicionar nova Categoria:</h5>
           <form onSubmit={handleCreateCategory}>
             <input type="text" name="newcategory" placeholder="Nome da categoria" required />
             <input type="hidden" name="username" value={username} />
-            <button type="submit">Criar Categoria</button>
+            <button  style={{marginTop:20,backgroundColor:"#2C4DAB",color:"white",padding:10}}type="submit">Criar Categoria</button>
           </form>
         </div>
       </Pop_up>
@@ -319,13 +355,30 @@ const Getusername = () => {
 
 const Users = () => (
   <>
-    <div className="container-fluid bg-primary text-purple">
+    <div style={{backgroundColor:'CFE2FF', height:60}}>
       <a href="http://localhost:3000" className="btn btn-danger">Sair</a>
     </div>
+
+    <div style={{marginTop:150,justifyContent:"space-around"}}>
+
+    <div style={{}}>
     <Getusername />
-    <div className="taskdiv">
-      <Callapi1 />
+
     </div>
+
+    <div style={{}} className="taskdiv">
+  <Callapi1 />
+</div>
+    <div >
+
+
+
+</div>
+
+
+
+    </div>
+    
   </>
 );
 
