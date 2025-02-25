@@ -6,9 +6,17 @@ import './bootstrap.css';
 
 const Callapi1 = () => {
   const [tasks, setTasks] = useState([]);
-  const [activeTab, setActiveTab] = useState("No Prazo");
+  const [editingTask, setEditingTask] = useState(null);
+  const [popEdit, setPopEdit] = useState(false);
+  const [categorias, setCategorias] = useState([]);
   const search = useLocation().search;
   const username = new URLSearchParams(search).get('username');
+  useEffect(() => {
+    fetch(`http://localhost:9000/getcategories?username=${username}`)
+    .then((res) => res.json())
+    .then((data) => setCategorias(data))
+    .catch((error) => console.error("Erro ao buscar categorias:", error));
+}, [username]);
 
   useEffect(() => {
     fetch(`http://localhost:9000/users?username=${username}`)
@@ -37,22 +45,6 @@ const Callapi1 = () => {
     }
   };
 
-  const moverParaLixeira = async (taskId) => {
-    try {
-      const response = await fetch("http://localhost:9000/trash", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ task: taskId, username }),
-      });
-
-      if (!response.ok) throw new Error("Erro ao mover tarefa para a lixeira");
-
-      setTasks((tarefas) => tarefas.map((t) => (t.id === taskId ? { ...t, lixo: true } : t)));
-    } catch (error) {
-      console.error("Erro ao mover para lixeira:", error);
-    }
-  };
-
   const excluirPermanentemente = async (taskId) => {
     try {
       const response = await fetch("http://localhost:9000/deletetask", {
@@ -69,79 +61,180 @@ const Callapi1 = () => {
     }
   };
 
+  const editarTask = (task) => {
+    setEditingTask(task);
+    setPopEdit(true);
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditingTask((prevTask) => ({ ...prevTask, [name]: value }));
+  };
+
+  const salvarEdicao = async () => {
+    if (!editingTask) return;
+    try {
+      const response = await fetch(`http://localhost:9000/edittask/${editingTask.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingTask),
+      });
+
+      if (!response.ok) throw new Error("Erro ao editar a tarefa");
+      
+      setTasks((prevTasks) => prevTasks.map((t) => (t.id === editingTask.id ? editingTask : t)));
+      setPopEdit(false);
+      setEditingTask(null);
+    } catch (error) {
+      console.error("Erro ao salvar edição:", error);
+    }
+  };
+
 
 
   return (
-   <div>
+    <div>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 0.40fr)',
+          gap: '1px',
+          justifyContent: 'center',
+          marginTop: 50,
+        }}
+        className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+        {tasks.map((task) => {
+          const taskDate = new Date(task.tempo);
+          return (
+            <div
+              key={task.id}
+              style={{
+                backgroundColor: '#CFE2FF',
+                alignContent: 'center',
+                height: 280,
+                borderRadius: 16,
+              }}
+              className="task-card"
+            >
+              <div>
+                <h1 style={{ marginLeft: 50, marginTop: 20, color: 'black' }}>{task.tasks}</h1>
+              </div>
+              <div>
+                <p style={{ width: 600, marginLeft: 50, marginTop: 20, color: "#68717A" }}>
+                  {task.descricao}
+                </p>
+              </div>
 
-<div  style={{display:'grid', gridTemplateColumns:'repeat(2,0.40fr)',gap:'1px',justifyContent:'center',marginTop:50}}className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div style={{ marginTop: 50, marginLeft: 50, color: "black" }}>
+                {new Date() > taskDate ? "Acabou o tempo" : "No prazo"}:{" "}
+                {taskDate.toLocaleDateString('pt-BR')}-{taskDate.toLocaleTimeString('pt-BR')} <br />
+              </div>
 
-    
-    {tasks.map((task) => {
-      const taskDate = new Date(task.tempo);
-      return (
-        
-        <div key={task.id} style={{backgroundColor:'#CFE2FF',alignContent:'center',height:280,borderRadius:16}} className="task-card">
-          <div> <h1 style={{marginLeft:50,marginTop:20,color:'black'}}>{task.tasks}</h1></div>
-          <div> <p style={{width:600,marginLeft:50,marginTop:20,color:"#68717A"}}>  {task.descricao} </p></div>
-          
-         
-          <div style={{marginTop:50,marginLeft:50,color:"black"}}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+                  <h6
+                    style={{
+                      backgroundColor: "#9747FF",
+                      width: 150,
+                      borderRadius: 12,
+                      paddingLeft: 25,
+                      height: 30,
+                      paddingTop: 5,
+                      marginTop: 20,
+                    }}
+                  >
+                    {task.nome_categoria || "Sem categoria"}
+                  </h6>
 
-          {new Date() > taskDate ? "Acabou o tempo" : "No prazo"}: 
-            {taskDate.toLocaleDateString('pt-BR')}-{taskDate.toLocaleTimeString('pt-BR')} <br />
+                  <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+                    <div>
+                      <button
+                        onClick={() => toggleFeito(task.id, task.feito)}
+                        style={{
+                          backgroundColor: task.feito ? "gray" : "green",
+                          color: "white",
+                          borderRadius: "5px",
+                        }}
+                      >
+                        {task.feito ? "Desmarcar" : "Concluída"}
+                      </button>
+                    </div>
 
-          </div>
-          <div>
-       <div style={{display:'flex',justifyContent:'space-around'}}>
-       
-     <h6  style={{backgroundColor:"#9747FF",width:150,borderRadius:12,paddingLeft:25,height:30,paddingTop:5,marginTop:20}}>        {task.nome_categoria || "Sem categoria"}
-     </h6>
-        
-
-       <div style={{display:'flex',justifyContent:'space-around'}}>
-
-<div > <button
-  onClick={() => toggleFeito(task.id, task.feito)}
-  style={{
-    backgroundColor: task.feito ? "gray" : "green",
-    color: task.feito ? "white" : "white",
-    borderRadius: "5px",
-  }}
->
-  {task.feito ? "Desmarcar" : "Concluída"}
-</button>
-</div>
-<div style={{marginLeft:10}}> <button style={{backgroundColor:"yellow",color:"black"
-}}>Editar</button></div>
-<div style={{marginLeft:10}}>  <button style={{backgroundColor:"red",color:"white"}} onClick={() => excluirPermanentemente(task.id)}>Excluir</button></div>
-
-
-   
-
-    
-
-</div>
-       </div>
-       
-          
-          </div>
-         
-          
+                    <div style={{ marginLeft: 10 }}>
+                      <button
+                        style={{ backgroundColor: "yellow", color: "black" }}
+                        onClick={() => editarTask(task)}
+                      >
+                        Editar
+                      </button>
+                    </div>
+            <Pop_up Setrigger={setPopEdit} trigger={popEdit}>
+                {editingTask && (
+                  <div className="edit-task-container">
+                    <h5>Editar Task</h5>
+                    <input
+                      type="text"
+                      name="tasks"
+                      value={editingTask.tasks}
+                      onChange={handleEditChange}
+                      placeholder="Nome da tarefa"
+                      required
+                    />
+                    <textarea
+                      name="descricao"
+                      value={editingTask.descricao}
+                      onChange={handleEditChange}
+                      placeholder="Descrição"
+                      required
+                    ></textarea>
+                    <input
+                      type="date"
+                      name="data" // Mudança aqui
+                      value={editingTask.tempo.split('T')[0]}
+                      onChange={(e) => setEditingTask({ ...editingTask, tempo: e.target.value + 'T' + editingTask.tempo.split('T')[1] })} // Mudança aqui
+                      required
+                    />
+                    <input
+                      type="time"
+                      name="hora" // Mudança aqui
+                      value={editingTask.tempo.split('T')[1].split('.')[0]}
+                      onChange={(e) => setEditingTask({ ...editingTask, tempo: editingTask.tempo.split('T')[0] + 'T' + e.target.value })} // Mudança aqui
+                      required
+                    />
+                    <select
+                      name="categoria"
+                      value={editingTask.categoria}
+                      onChange={handleEditChange}
+                      required
+                    >
+                      <option value="">Selecione a categoria</option>
+                      {categorias.map((categoria) => (
+                        <option key={categoria.id} value={categoria.id}>
+                          {categoria.nome}
+                        </option>
+                      ))}
+                    </select>
+                    <button onClick={salvarEdicao}>Salvar</button>
+                  </div>
+                )}
+              </Pop_up>;
+                    <div style={{ marginLeft: 10 }}>
+                      <button
+                        style={{ backgroundColor: "red", color: "white" }}
+                        onClick={() => excluirPermanentemente(task.id)}
+                      >
+                        Excluir
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
-
-
-    );
-  })}
-
-  
-  </div>
-    
- 
-
-   </div>
-      
-    
+    </div>
   );
 };
 
@@ -202,6 +295,7 @@ const Getusername = () => {
       alert("Erro ao criar categoria!");
     }
   };
+  
 
  
 

@@ -14,8 +14,8 @@ app.set("view engine", "ejs");
 const pool = new Pool({
   host: "localhost",
   user: "postgres", // Usuário do PostgreSQL
-  password: "password", // Senha do PostgreSQL
-  database: "postgres", // Nome do banco de dados
+  password: "1234", // Senha do PostgreSQL
+  database: "tictaskbd", // Nome do banco de dados
   port: 5432, // Porta padrão do PostgreSQL
 });
 
@@ -75,41 +75,60 @@ app.post("/login", async (req, res) => {
 
 // Rota para criar uma nova tarefa
 app.post("/createtask", async (req, res) => {
-  console.log("Recebendo dados no backend:", req.body); 
+  console.log("Recebendo dados no backend:", req.body);
 
   const { newtask, username, newdescricao, newcheck, newtime_date, newtime_hour, category } = req.body;
 
-  console.log(category)
   if (!username || !newtask || !newtime_date || !newtime_hour) {
     console.error("Erro: campos obrigatórios ausentes.");
-    return res.status(400).send("Campos obrigatórios ausentes.");
+    return res.status(400).json({ error: "Campos obrigatórios ausentes." });
   }
-
-  // Se não houver categoria, definir como "Sem categoria" (ID 1)
 
   const fullTimestamp = `${newtime_date} ${newtime_hour}:00`;
-  var name_c=null
- var final_category=null
- console.log(category)
-  if (category){
-    const nome_c=  await pool.query(
-      "SELECT nome FROM categoria WHERE id=$1",
-      [category]
-    )
+  let name_c = "Sem categoria";
+  let final_category = null;
 
-  console.log(nome_c)
-  name_c=nome_c.rows[0].nome
-  final_category=category
-
-  }
-  console.log(name_c)
   try {
+    if (category) {
+      const categoryResult = await pool.query(
+        "SELECT nome FROM categoria WHERE id = $1",
+        [category]
+      );
+
+      if (categoryResult.rows.length > 0) {
+        name_c = categoryResult.rows[0].nome;
+        final_category = category;
+      } else {
+        console.warn(`Aviso: Categoria com ID ${category} não encontrada. Usando padrão.`);
+      }
+    }
+
     await pool.query(
-      "INSERT INTO tasks (username, tasks, descricao, feito, tempo, category_id, nome_categoria) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-      [username, newtask, newdescricao, newcheck, fullTimestamp, final_category, name_c]
+      `INSERT INTO tasks (username, tasks, descricao, feito, tempo, category_id, nome_categoria) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [username, newtask, newdescricao || "", newcheck || false, fullTimestamp, final_category, name_c]
     );
 
     console.log(`Tarefa adicionada com sucesso: ${newtask} para o usuário ${username}`);
+    res.redirect(`http://localhost:3000/users?username=${username}`);
+  } catch (err) {
+    console.error("Erro ao criar tarefa:", err);
+    res.status(500).json({ error: "Erro ao criar tarefa." });
+  }
+});
+
+app.post("/createcategory", async (req, res) => {
+  console.log("Recebendo dados no backend:", req.body); // <-- Adicionado para debug
+
+  const { newcategory, username} = req.body;
+    console.log(req.body)
+  if (!username) {
+    console.error("Erro: newtask ou username estão ausentes.");
+    return res.status(400).send("username inválido.");
+  }
+
+  try {
+    await pool.query("INSERT INTO categoria (username, nome) VALUES ($1,$2)", [username, newcategory]);
     res.redirect(`http://localhost:3000/users?username=${username}`);
   } catch (err) {
     console.error("Erro ao criar tarefa:", err);
@@ -118,28 +137,6 @@ app.post("/createtask", async (req, res) => {
 });
 
 
-
-app.post("/createcategory", async (req, res) => {
-  console.log("Dados recebidos no backend:", req.body); // DEBUG
-
-  const { newcategory, username } = req.body;
-
-  if (!username || !newcategory) {
-    console.error("Erro: campos obrigatórios ausentes.", req.body);
-    return res.status(400).send("Campos obrigatórios ausentes.");
-  }
-
-  try {
-    await pool.query(
-      "INSERT INTO categoria (username, nome) VALUES ($1, $2)",
-      [username, newcategory]
-    );
-    res.redirect(`http://localhost:3000/users?username=${username}`);
-  } catch (err) {
-    console.error("Erro ao criar categoria:", err);
-    res.status(500).send("Erro ao criar categoria.");
-  }
-});
 
 app.delete("/deletecategory", async (req, res) => {
   const { categoryId } = req.body;
@@ -223,27 +220,25 @@ app.delete("/deletetask", async (req, res) => {
   }
 });
 
-app.put("/trash", async (req, res) => {
-  const { task, username } = req.body;
-
-  if (!task || !username) {
-    return res.status(400).json({ mensagem: "ID da tarefa e usuário são obrigatórios!" });
-  }
+// Rota para editar uma tarefa
+app.put("/edittask/:id", async (req, res) => {
+  const { id } = req.params;
+  const { tasks, descricao, tempo, nome_categoria } = req.body;
 
   try {
     const result = await pool.query(
-      "UPDATE tasks SET lixo = TRUE WHERE id = $1 AND username = $2",
-      [task, username]
+      "UPDATE tasks SET tasks = $1, descricao = $2, tempo = $3, nome_categoria = $4 WHERE id = $5 RETURNING *",
+      [tasks, descricao, tempo, nome_categoria, id]
     );
 
-    if (result.rowCount > 0) {
-      res.json({ mensagem: "Tarefa movida para a lixeira!" });
-    } else {
-      res.status(404).json({ mensagem: "Tarefa não encontrada." });
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Tarefa não encontrada" });
     }
-  } catch (err) {
-    console.error("Erro ao mover para a lixeira:", err);
-    res.status(500).send("Erro ao mover para a lixeira.");
+
+    res.json({ message: "Tarefa atualizada com sucesso!", task: result.rows[0] });
+  } catch (error) {
+    console.error("Erro ao editar a tarefa:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
   }
 });
 
